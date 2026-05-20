@@ -302,8 +302,11 @@
           <select id="outSize"></select>
         </div>
         <div class="slider-row" id="customRow" style="display:none">
-          <label>カスタム幅 (高さはアスペクト比に応じて自動算出)</label>
-          <input type="number" id="customW" value="800" min="100" max="8000">
+          <label>カスタムサイズ (幅 × 高)</label>
+          <div class="row">
+            <input type="number" id="customW" value="1200" min="100" max="8000" placeholder="幅">
+            <input type="number" id="customH" value="800" min="100" max="8000" placeholder="高">
+          </div>
         </div>
       </div>
 
@@ -355,15 +358,8 @@ const MODES = {
       },
     ],
     needs: ['pc', 'phone'],
-    defaultCornerR: 100, // combined-image phone has small natural radius, add extra rounding
-    aspect: 3/2, // output crop 3:2
-    sizes: [
-      ['800x533', '800 × 533 (3:2)'],
-      ['1200x800', '1200 × 800 (3:2)'],
-      ['1600x1067', '1600 × 1067 (3:2)'],
-      ['2400x1600', '2400 × 1600 (3:2)'],
-      ['custom', 'カスタム…'],
-    ],
+    defaultCornerR: 100,
+    defaultSize: '1200x800',
   },
   laptop: {
     base: 'laptop_only.jpg',
@@ -377,13 +373,7 @@ const MODES = {
     ],
     needs: ['pc'],
     defaultCornerR: 0,
-    aspect: 3/2,
-    sizes: [
-      ['1200x800', '1200 × 800 (3:2)'],
-      ['1600x1067', '1600 × 1067 (3:2)'],
-      ['2400x1600', '2400 × 1600 (3:2)'],
-      ['custom', 'カスタム…'],
-    ],
+    defaultSize: '1200x800',
   },
   phone: {
     base: 'phone_only.jpg',
@@ -396,16 +386,38 @@ const MODES = {
       },
     ],
     needs: ['phone'],
-    defaultCornerR: 0, // phone_only.jpg's screen already has very rounded natural corners
-    aspect: 9/16, // portrait-ish for phone
-    sizes: [
-      ['540x960', '540 × 960 (9:16)'],
-      ['720x1280', '720 × 1280 (9:16)'],
-      ['1080x1920', '1080 × 1920 (9:16)'],
-      ['custom', 'カスタム…'],
-    ],
+    defaultCornerR: 0,
+    defaultSize: '1080x1920',
   },
 };
+
+// Output sizes available across all modes. Grouped by aspect ratio.
+// (Ratio is derived from W/H at render time, so any size works in any mode.)
+const SIZE_GROUPS = [
+  ['ウェブ・記事用 (3:2)', [
+    ['800x533',  '800 × 533'],
+    ['1200x800', '1200 × 800'],
+    ['1600x1067','1600 × 1067'],
+    ['2400x1600','2400 × 1600'],
+  ]],
+  ['Instagram 投稿 (1:1)', [
+    ['1080x1080','1080 × 1080'],
+    ['2048x2048','2048 × 2048'],
+  ]],
+  ['Instagram ポートレート (4:5)', [
+    ['1080x1350','1080 × 1350'],
+  ]],
+  ['Stories / Reels / TikTok (9:16)', [
+    ['540x960',  '540 × 960'],
+    ['720x1280', '720 × 1280'],
+    ['1080x1920','1080 × 1920'],
+  ]],
+  ['YouTube / X 横長 (16:9)', [
+    ['1280x720', '1280 × 720'],
+    ['1920x1080','1920 × 1080'],
+    ['2560x1440','2560 × 1440'],
+  ]],
+];
 
 const state = {
   mode: 'combined',
@@ -435,14 +447,11 @@ async function setMode(mode) {
   const needsPhone = cfg.needs.includes('phone');
   document.getElementById('posPC').style.display = needsPC ? '' : 'none';
   document.getElementById('posPhone').style.display = needsPhone ? '' : 'none';
-  // Size options
+  // Switch to this mode's default size only if user hasn't picked something else yet.
+  // (Sizes are populated once at startup — same options across all modes.)
   const sel = document.getElementById('outSize');
-  sel.innerHTML = '';
-  for (const [v, label] of cfg.sizes) {
-    const opt = document.createElement('option');
-    opt.value = v; opt.textContent = label; sel.appendChild(opt);
-  }
-  document.getElementById('customRow').style.display = 'none';
+  if (!sel.dataset.userChose) sel.value = cfg.defaultSize;
+  document.getElementById('customRow').style.display = sel.value === 'custom' ? 'block' : 'none';
 
   // Reset position sliders when switching mode
   resetPositions();
@@ -631,8 +640,7 @@ function computeCrop(canvas, aspect) {
 }
 
 function renderFinal(comp, outW, outH) {
-  const cfg = MODES[state.mode];
-  const crop = computeCrop(comp, cfg.aspect);
+  const crop = computeCrop(comp, outW / outH);
   const final = document.createElement('canvas');
   final.width = outW; final.height = outH;
   const fctx = final.getContext('2d');
@@ -771,8 +779,8 @@ async function updatePreview() {
   const sizeSel = document.getElementById('outSize').value;
   let outW, outH;
   if (sizeSel === 'custom') {
-    outW = Math.max(100, parseInt(document.getElementById('customW').value) || 800);
-    outH = Math.round(outW / cfg.aspect);
+    outW = Math.max(100, parseInt(document.getElementById('customW').value) || 1200);
+    outH = Math.max(100, parseInt(document.getElementById('customH').value) || 800);
   } else {
     [outW, outH] = sizeSel.split('x').map(Number);
   }
@@ -845,11 +853,32 @@ document.getElementById('btnResetPos').addEventListener('click', () => {
   resetPositions();
   updatePreview();
 });
+// Populate the size dropdown once with all groups
+(function populateSizes() {
+  const sel = document.getElementById('outSize');
+  sel.innerHTML = '';
+  for (const [label, options] of SIZE_GROUPS) {
+    const og = document.createElement('optgroup');
+    og.label = label;
+    for (const [v, l] of options) {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = l;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+  const custom = document.createElement('option');
+  custom.value = 'custom'; custom.textContent = 'カスタム…';
+  sel.appendChild(custom);
+})();
+
 document.getElementById('outSize').addEventListener('change', e => {
+  e.target.dataset.userChose = '1';  // remember user picked, so mode switches don't override
   document.getElementById('customRow').style.display = e.target.value === 'custom' ? 'block' : 'none';
   updatePreview();
 });
 document.getElementById('customW').addEventListener('change', updatePreview);
+document.getElementById('customH').addEventListener('change', updatePreview);
 document.getElementById('btnPreview').addEventListener('click', updatePreview);
 document.getElementById('btnDownload').addEventListener('click', downloadPNG);
 
