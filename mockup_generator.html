@@ -2,6 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';">
+<meta name="referrer" content="no-referrer">
 <title>Mockup Generator</title>
 <style>
   :root {
@@ -42,6 +45,26 @@
   }
   .dl-link:hover { background: #2c3444; border-color: var(--accent); color: var(--accent-2); }
   .dl-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .privacy-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-top: 6px;
+  }
+  .privacy-note::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #43c47e;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
 
   /* Tabs */
   .tabs {
@@ -202,6 +225,7 @@
     <div>
       <h1>Mockup Generator</h1>
       <div class="sub">スクリーンショットを差し替えるだけでモックアップを生成します</div>
+      <div class="privacy-note">画像はあなたのブラウザ内のみで処理され、外部サーバーへは送信されません</div>
     </div>
     <a class="dl-link" href="index.html" download="mockup-generator.html" title="単一HTMLファイルをダウンロード（オフラインで使えます）">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -654,6 +678,20 @@ function renderFinal(comp, outW, outH) {
 }
 
 // ---------- UI ----------
+const MAX_FILE_MB = 30;
+function validateImageFile(file) {
+  if (!file.type.startsWith('image/')) {
+    alert('画像ファイルを選択してください（PNG / JPG / WebP など）');
+    return false;
+  }
+  const mb = file.size / 1024 / 1024;
+  if (mb > MAX_FILE_MB) {
+    alert(`ファイルが大きすぎます (${mb.toFixed(1)}MB)。${MAX_FILE_MB}MB以下にしてください`);
+    return false;
+  }
+  return true;
+}
+
 function readFileAsImage(file) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
@@ -677,7 +715,15 @@ function setupDropZone(dropEl, fileInput, onLoad) {
   });
   fileInput.addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return;
-    const img = await readFileAsImage(f);
+    if (!validateImageFile(f)) { fileInput.value = ''; return; }
+    let img;
+    try {
+      img = await readFileAsImage(f);
+    } catch {
+      alert('画像の読み込みに失敗しました（壊れているか非対応の形式の可能性）');
+      fileInput.value = '';
+      return;
+    }
     dropEl.classList.add('has-file');
     const labelText = dropEl.dataset.need === 'pc' ? 'PC スクリーンショット'
                     : dropEl.dataset.need === 'phone' ? 'スマートフォン スクリーンショット'
@@ -740,8 +786,10 @@ async function updatePreview() {
   statusEl.style.display = 'none';
 
   document.getElementById('btnDownload').disabled = false;
-  document.getElementById('metaInfo').innerHTML =
-    '<b>' + outW + ' × ' + outH + '</b> px · 背景: <b>透明 (PNG)</b>';
+  const meta = document.getElementById('metaInfo');
+  const bSize = document.createElement('b'); bSize.textContent = outW + ' × ' + outH;
+  const bBg   = document.createElement('b'); bBg.textContent = '透明 (PNG)';
+  meta.replaceChildren(bSize, document.createTextNode(' px · 背景: '), bBg);
 }
 
 function downloadPNG() {
