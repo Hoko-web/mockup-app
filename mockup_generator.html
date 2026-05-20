@@ -75,7 +75,10 @@
     flex: 1;
     padding: 10px 14px;
     text-align: center;
+    border: none;
+    background: transparent;
     border-radius: 8px;
+    font: inherit;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-dim);
@@ -222,9 +225,9 @@
   <div class="privacy-note" style="margin-bottom:24px">画像はあなたのブラウザ内のみで処理され、外部サーバーへは送信されません</div>
 
   <div class="tabs">
-    <div class="tab active" data-mode="combined">PC + スマホ</div>
-    <div class="tab" data-mode="laptop">PC のみ</div>
-    <div class="tab" data-mode="phone">スマホのみ</div>
+    <button type="button" class="tab active" data-mode="combined">PC + スマホ</button>
+    <button type="button" class="tab" data-mode="laptop">PC のみ</button>
+    <button type="button" class="tab" data-mode="phone">スマホのみ</button>
   </div>
 
   <div class="layout">
@@ -249,30 +252,30 @@
           <div class="dev-label">PC スクリーンショット</div>
           <div class="nudge-row">
             <span class="nudge-axis">左右</span>
-            <button class="nudge-btn" data-target="pcX" data-delta="-1">−</button>
+            <button type="button" class="nudge-btn" data-target="pcX" data-delta="-1">−</button>
             <span class="nudge-val" id="pcXVal">0</span>
-            <button class="nudge-btn" data-target="pcX" data-delta="1">＋</button>
+            <button type="button" class="nudge-btn" data-target="pcX" data-delta="1">＋</button>
           </div>
           <div class="nudge-row">
             <span class="nudge-axis">上下</span>
-            <button class="nudge-btn" data-target="pcY" data-delta="-1">−</button>
+            <button type="button" class="nudge-btn" data-target="pcY" data-delta="-1">−</button>
             <span class="nudge-val" id="pcYVal">0</span>
-            <button class="nudge-btn" data-target="pcY" data-delta="1">＋</button>
+            <button type="button" class="nudge-btn" data-target="pcY" data-delta="1">＋</button>
           </div>
         </div>
         <div id="posPhone" style="display:none">
           <div class="dev-label">スマートフォン スクリーンショット</div>
           <div class="nudge-row">
             <span class="nudge-axis">左右</span>
-            <button class="nudge-btn" data-target="phX" data-delta="-1">−</button>
+            <button type="button" class="nudge-btn" data-target="phX" data-delta="-1">−</button>
             <span class="nudge-val" id="phXVal">0</span>
-            <button class="nudge-btn" data-target="phX" data-delta="1">＋</button>
+            <button type="button" class="nudge-btn" data-target="phX" data-delta="1">＋</button>
           </div>
           <div class="nudge-row">
             <span class="nudge-axis">上下</span>
-            <button class="nudge-btn" data-target="phY" data-delta="-1">−</button>
+            <button type="button" class="nudge-btn" data-target="phY" data-delta="-1">−</button>
             <span class="nudge-val" id="phYVal">0</span>
-            <button class="nudge-btn" data-target="phY" data-delta="1">＋</button>
+            <button type="button" class="nudge-btn" data-target="phY" data-delta="1">＋</button>
           </div>
         </div>
         <!-- hidden inputs hold the values -->
@@ -280,7 +283,7 @@
         <input type="hidden" id="pcY" value="0">
         <input type="hidden" id="phX" value="0">
         <input type="hidden" id="phY" value="0">
-        <button class="btn secondary" id="btnResetPos" style="margin-top:10px;font-size:12px;padding:8px">位置をリセット</button>
+        <button type="button" class="btn secondary" id="btnResetPos" style="margin-top:10px;font-size:12px;padding:8px">位置をリセット</button>
       </div>
 
       <div class="panel">
@@ -301,8 +304,8 @@
       <div class="panel">
         <h2>4. ダウンロード</h2>
         <div class="row">
-          <button class="btn secondary" id="btnPreview">プレビュー更新</button>
-          <button class="btn" id="btnDownload" disabled>PNG を保存</button>
+          <button type="button" class="btn secondary" id="btnPreview">プレビュー更新</button>
+          <button type="button" class="btn" id="btnDownload" disabled>PNG を保存</button>
         </div>
         <div class="meta" id="metaInfo">画像をアップロードしてください</div>
       </div>
@@ -737,16 +740,16 @@ async function updatePreview() {
   await new Promise(r => setTimeout(r, 16));
 
   const offsets = {
-    pc:    { x: parseInt(document.getElementById('pcX').value) || 0, y: parseInt(document.getElementById('pcY').value) || 0 },
-    phone: { x: parseInt(document.getElementById('phX').value) || 0, y: parseInt(document.getElementById('phY').value) || 0 },
+    pc:    { x: parseInt(document.getElementById('pcX').value, 10) || 0, y: parseInt(document.getElementById('pcY').value, 10) || 0 },
+    phone: { x: parseInt(document.getElementById('phX').value, 10) || 0, y: parseInt(document.getElementById('phY').value, 10) || 0 },
   };
   const comp = composite(offsets);
 
   const sizeSel = document.getElementById('outSize').value;
   let outW, outH;
   if (sizeSel === 'custom') {
-    outW = Math.max(100, parseInt(document.getElementById('customW').value) || 1200);
-    outH = Math.max(100, parseInt(document.getElementById('customH').value) || 800);
+    outW = Math.max(100, parseInt(document.getElementById('customW').value, 10) || 1200);
+    outH = Math.max(100, parseInt(document.getElementById('customH').value, 10) || 800);
   } else {
     [outW, outH] = sizeSel.split('x').map(Number);
   }
@@ -804,8 +807,8 @@ let nudgeTimer = null;
 document.querySelectorAll('.nudge-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const target = btn.dataset.target;
-    const delta = parseInt(btn.dataset.delta);
-    const cur = parseInt(document.getElementById(target).value) || 0;
+    const delta = parseInt(btn.dataset.delta, 10);
+    const cur = parseInt(document.getElementById(target).value, 10) || 0;
     const next = Math.max(-50, Math.min(50, cur + delta));
     setNudgeValue(target, next);
     if (nudgeTimer) clearTimeout(nudgeTimer);
