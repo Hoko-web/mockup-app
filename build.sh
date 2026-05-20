@@ -9,8 +9,9 @@ import base64, pathlib
 bases = ['base.jpg', 'laptop_only.jpg', 'phone_only.jpg']
 html = pathlib.Path("mockup_generator.html").read_text(encoding="utf-8")
 for fname in bases:
-    b64 = base64.b64encode(pathlib.Path(fname).read_bytes()).decode()
-    marker = f"base: '{fname}'"
+    path = pathlib.Path("assets") / fname
+    b64 = base64.b64encode(path.read_bytes()).decode()
+    marker = f"base: 'assets/{fname}'"
     replacement = f"base: 'data:image/jpeg;base64,{b64}'"
     if marker not in html:
         raise SystemExit(f"marker not found: {marker}")

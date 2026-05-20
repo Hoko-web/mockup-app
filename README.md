@@ -47,10 +47,10 @@
 |---|---|
 | `mockup_generator.html` | 開発版（base 画像を外部から読み込む / 30KB） |
 | `index.html` | **配布版**（base 画像を base64 で埋め込んだ単一ファイル / 3.5MB） |
-| `base.jpg` | PC + スマホの合成 base 画像 |
-| `laptop_only.jpg` | PC 単体の base 画像 |
-| `phone_only.jpg` | スマホ単体の base 画像 |
-| `build.sh` | `mockup_generator.html` + base 画像 → `index.html` 生成 |
+| `assets/base.jpg` | PC + スマホの合成 base 画像 |
+| `assets/laptop_only.jpg` | PC 単体の base 画像 |
+| `assets/phone_only.jpg` | スマホ単体の base 画像 |
+| `build.sh` | `mockup_generator.html` + `assets/` の画像 → `index.html` 生成 |
 
 ## ローカル開発
 
