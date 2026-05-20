@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Mockup Generator</title>
+<style>
+  :root {
+    --bg: #0f1218;
+    --panel: #1a1f2a;
+    --panel-2: #232a38;
+    --line: #2c3444;
+    --text: #e8ebf2;
+    --text-dim: #8a93a4;
+    --accent: #4f8cff;
+    --accent-2: #74a3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 24px 64px; }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; letter-spacing: 0.02em; }
+  .sub { color: var(--text-dim); font-size: 13px; }
+
+  .dl-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    white-space: nowrap;
+  }
+  .dl-link:hover { background: #2c3444; border-color: var(--accent); color: var(--accent-2); }
+  .dl-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--panel);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 14px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--accent); color: #fff; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 0 0 14px; font-weight: 600; }
+
+  .drop {
+    border: 2px dashed var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--panel-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .drop:hover, .drop.drag { border-color: var(--accent); background: #1f2a40; }
+  .drop .label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .drop .hint { font-size: 11px; }
+  .drop.has-file { padding: 10px; }
+  .drop.has-file .preview {
+    width: 100%; height: 80px;
+    background: #0c0f15;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .drop input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .drop + .drop { margin-top: 12px; }
+  .slot-name { font-size: 11px; color: var(--accent-2); margin-top: 4px; word-break: break-all; }
+
+  .slider-row { margin-bottom: 14px; }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-row label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-dim); margin-bottom: 6px;
+  }
+  .slider-row label .val { color: var(--accent-2); font-variant-numeric: tabular-nums; }
+  .slider-row input[type=range] { width: 100%; accent-color: var(--accent); }
+  select, input[type=number] {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 100%;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 12px 16px; border-radius: 8px; border: none;
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.12s; width: 100%;
+  }
+  .btn:hover { background: var(--accent-2); }
+  .btn:disabled { background: #374257; cursor: not-allowed; color: #6b7280; }
+  .btn.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); }
+  .btn.secondary:hover { background: #2c3444; }
+
+  .preview-wrap {
+    background:
+      linear-gradient(45deg, #20242d 25%, transparent 25%),
+      linear-gradient(-45deg, #20242d 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #20242d 75%),
+      linear-gradient(-45deg, transparent 75%, #20242d 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+    background-color: #161a22;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    min-height: 400px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #preview { max-width: 100%; max-height: 70vh; display: block; image-rendering: -webkit-optimize-contrast; }
+  .preview-status { color: var(--text-dim); font-size: 14px; }
+
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row > * { flex: 1; }
+  .meta { font-size: 12px; color: var(--text-dim); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .meta b { color: var(--text); font-weight: 600; }
+
+  /* Nudge buttons */
+  .dev-label { font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 600; }
+  #posPhone .dev-label { margin-top: 14px; }
+  .nudge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .nudge-row:last-child { margin-bottom: 0; }
+  .nudge-axis {
+    width: 32px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .nudge-btn {
+    flex: 1;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    line-height: 1;
+  }
+  .nudge-btn:hover { background: #2c3444; border-color: var(--accent); }
+  .nudge-btn:active { background: var(--accent); color: #fff; }
+  .nudge-val {
+    min-width: 38px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--accent-2);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-row">
+    <div>
+      <h1>Mockup Generator</h1>
+      <div class="sub">スクリーンショットを差し替えるだけでモックアップを生成します</div>
+    </div>
+    <a class="dl-link" href="index.html" download="mockup-generator.html" title="単一HTMLファイルをダウンロード（オフラインで使えます）">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      オフライン版をダウンロード
+    </a>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-mode="combined">PC + スマホ</div>
+    <div class="tab" data-mode="laptop">PC のみ</div>
+    <div class="tab" data-mode="phone">スマホのみ</div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>1. 画像を選択</h2>
+        <div class="drop" id="dropPC" data-need="laptop">
+          <input type="file" id="filePC" accept="image/*">
+          <div class="label">PC スクリーンショット</div>
+          <div class="hint">クリックまたはドラッグ＆ドロップ</div>
+        </div>
+        <div class="drop" id="dropPhone" data-need="phone">
+          <input type="file" id="filePhone" accept="image/*">
+          <div class="label">スマートフォン スクリーンショット</div>
+          <div class="hint">クリックまたはドラッグ＆ドロップ</div>
+        </div>
+      </div>
+
+      <div class="panel" id="panelPos">
+        <h2>2. 画像の位置を微調整</h2>
+        <div id="posPC" style="display:none">
+          <div class="dev-label">PC スクリーンショット</div>
+          <div class="nudge-row">
+            <span class="nudge-axis">左右</span>
+            <button class="nudge-btn" data-target="pcX" data-delta="-1">−</button>
+            <span class="nudge-val" id="pcXVal">0</span>
+            <button class="nudge-btn" data-target="pcX" data-delta="1">＋</button>
+          </div>
+          <div class="nudge-row">
+            <span class="nudge-axis">上下</span>
+            <button class="nudge-btn" data-target="pcY" data-delta="-1">−</button>
+            <span class="nudge-val" id="pcYVal">0</span>
+            <button class="nudge-btn" data-target="pcY" data-delta="1">＋</button>
+          </div>
+        </div>
+        <div id="posPhone" style="display:none">
+          <div class="dev-label">スマートフォン スクリーンショット</div>
+          <div class="nudge-row">
+            <span class="nudge-axis">左右</span>
+            <button class="nudge-btn" data-target="phX" data-delta="-1">−</button>
+            <span class="nudge-val" id="phXVal">0</span>
+            <button class="nudge-btn" data-target="phX" data-delta="1">＋</button>
+          </div>
+          <div class="nudge-row">
+            <span class="nudge-axis">上下</span>
+            <button class="nudge-btn" data-target="phY" data-delta="-1">−</button>
+            <span class="nudge-val" id="phYVal">0</span>
+            <button class="nudge-btn" data-target="phY" data-delta="1">＋</button>
+          </div>
+        </div>
+        <!-- hidden inputs hold the values -->
+        <input type="hidden" id="pcX" value="0">
+        <input type="hidden" id="pcY" value="0">
+        <input type="hidden" id="phX" value="0">
+        <input type="hidden" id="phY" value="0">
+        <button class="btn secondary" id="btnResetPos" style="margin-top:10px;font-size:12px;padding:8px">位置をリセット</button>
+      </div>
+
+      <div class="panel">
+        <h2>3. 出力設定</h2>
+        <div class="slider-row">
+          <label>出力サイズ</label>
+          <select id="outSize"></select>
+        </div>
+        <div class="slider-row" id="customRow" style="display:none">
+          <label>カスタム幅 (高さはアスペクト比に応じて自動算出)</label>
+          <input type="number" id="customW" value="800" min="100" max="8000">
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>4. ダウンロード</h2>
+        <div class="row">
+          <button class="btn secondary" id="btnPreview">プレビュー更新</button>
+          <button class="btn" id="btnDownload" disabled>PNG を保存</button>
+        </div>
+        <div class="meta" id="metaInfo">画像をアップロードしてください</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="padding:0;background:transparent;border:none">
+        <div class="preview-wrap">
+          <div class="preview-status" id="status">ここにプレビューが表示されます</div>
+          <canvas id="preview" style="display:none"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// Multi-mode mockup generator
+// =====================================================
+// MODES: each has a base image with one or more screen regions.
+// Each screen region has:
+//   - rect (x1,y1,x2,y2)
+//   - optional `notch` (pill connected to top bezel: skip this area)
+//   - kind: 'phone' (apply cornerR) or 'laptop' (no extra rounding)
+// =====================================================
+const MODES = {
+  combined: {
+    base: 'base.jpg',
+    screens: [
+      {
+        kind: 'laptop',
+        slot: 'pc',
+        rect: { x1: 1274, y1: 1700, x2: 6682, y2: 5069 },
+      },
+      {
+        kind: 'phone',
+        slot: 'phone',
+        rect: { x1: 6232, y1: 3830, x2: 7474, y2: 6504 },
+        notch: { x1: 6620, y1: 3830, x2: 7100, y2: 3930, cornerR: 40 },
+      },
+    ],
+    needs: ['pc', 'phone'],
+    defaultCornerR: 100, // combined-image phone has small natural radius, add extra rounding
+    aspect: 3/2, // output crop 3:2
+    sizes: [
+      ['800x533', '800 × 533 (3:2)'],
+      ['1200x800', '1200 × 800 (3:2)'],
+      ['1600x1067', '1600 × 1067 (3:2)'],
+      ['2400x1600', '2400 × 1600 (3:2)'],
+      ['custom', 'カスタム…'],
+    ],
+  },
+  laptop: {
+    base: 'laptop_only.jpg',
+    screens: [
+      {
+        kind: 'laptop',
+        slot: 'pc',
+        // tight white-screen bounds in laptop_only.jpg
+        rect: { x1: 1347, y1: 2260, x2: 6653, y2: 5566 },
+      },
+    ],
+    needs: ['pc'],
+    defaultCornerR: 0,
+    aspect: 3/2,
+    sizes: [
+      ['1200x800', '1200 × 800 (3:2)'],
+      ['1600x1067', '1600 × 1067 (3:2)'],
+      ['2400x1600', '2400 × 1600 (3:2)'],
+      ['custom', 'カスタム…'],
+    ],
+  },
+  phone: {
+    base: 'phone_only.jpg',
+    screens: [
+      {
+        kind: 'phone',
+        slot: 'phone',
+        // tight screen bounds in phone_only.jpg (above the Dynamic Island)
+        rect: { x1: 1615, y1: 601, x2: 3392, y2: 4399 },
+      },
+    ],
+    needs: ['phone'],
+    defaultCornerR: 0, // phone_only.jpg's screen already has very rounded natural corners
+    aspect: 9/16, // portrait-ish for phone
+    sizes: [
+      ['540x960', '540 × 960 (9:16)'],
+      ['720x1280', '720 × 1280 (9:16)'],
+      ['1080x1920', '1080 × 1920 (9:16)'],
+      ['custom', 'カスタム…'],
+    ],
+  },
+};
+
+const state = {
+  mode: 'combined',
+  baseImg: null,         // current loaded base image
+  baseScreenEdges: null, // { screenIndex: { y: {left, right} } }
+  baseData: null,        // base ImageData.data for in-place hole preservation
+  pcImg: null,
+  phoneImg: null,
+};
+
+// ---------- Image / file utils ----------
+async function loadBase(src) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
+  return img;
+}
+
+async function setMode(mode) {
+  state.mode = mode;
+  const cfg = MODES[mode];
+  // Visibility of drops
+  document.getElementById('dropPC').style.display = cfg.needs.includes('pc') ? '' : 'none';
+  document.getElementById('dropPhone').style.display = cfg.needs.includes('phone') ? '' : 'none';
+  // Visibility of position panels per active mode
+  const needsPC = cfg.needs.includes('pc');
+  const needsPhone = cfg.needs.includes('phone');
+  document.getElementById('posPC').style.display = needsPC ? '' : 'none';
+  document.getElementById('posPhone').style.display = needsPhone ? '' : 'none';
+  // Size options
+  const sel = document.getElementById('outSize');
+  sel.innerHTML = '';
+  for (const [v, label] of cfg.sizes) {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = label; sel.appendChild(opt);
+  }
+  document.getElementById('customRow').style.display = 'none';
+
+  // Reset position sliders when switching mode
+  resetPositions();
+
+  // Load base
+  statusEl.textContent = 'デバイス画像を読み込み中…';
+  try {
+    state.baseImg = await loadBase(cfg.base);
+  } catch (e) {
+    statusEl.textContent = 'デバイス画像 (' + cfg.base + ') の読み込みに失敗しました';
+    return;
+  }
+  // Precompute base data + per-screen row edges
+  const W = state.baseImg.width, H = state.baseImg.height;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(state.baseImg, 0, 0);
+  state.baseData = ctx.getImageData(0, 0, W, H).data;
+
+  // For each screen, compute the EXACT screen mask via flood-fill from rect center.
+  // This walks through the white screen pixels, naturally bounded by the dark bezel —
+  // so background white outside the device is excluded, and the screen's true rounded
+  // shape (whatever the device has) is followed pixel-perfectly.
+  state.baseScreenMasks = {};
+  cfg.screens.forEach((s, idx) => {
+    const r = s.rect;
+    const mw = r.x2 - r.x1, mh = r.y2 - r.y1;
+    const mask = new Uint8Array(mw * mh);
+    const isW = (x, y) => {
+      const i = (y * W + x) * 4;
+      return state.baseData[i] > 245 && state.baseData[i+1] > 245 && state.baseData[i+2] > 245;
+    };
+    // Seed: pick a white pixel near the centre of the rect (skips Dynamic Island etc).
+    const cx = Math.floor((r.x1 + r.x2) / 2);
+    const cy = Math.floor((r.y1 + r.y2) / 2);
+    let sx = cx, sy = cy;
+    if (!isW(sx, sy)) {
+      // Search nearby for a white seed
+      outer:
+      for (let dr = 1; dr < Math.min(mw, mh) / 2; dr++) {
+        for (let dy = -dr; dy <= dr; dy += dr) {
+          for (let dx = -dr; dx <= dr; dx += dr) {
+            if (isW(cx + dx, cy + dy)) { sx = cx + dx; sy = cy + dy; break outer; }
+          }
+        }
+      }
+    }
+    const stack = [(sy - r.y1) * mw + (sx - r.x1)];
+    mask[stack[0]] = 1;
+    while (stack.length) {
+      const mi = stack.pop();
+      const lx = mi % mw, ly = (mi - lx) / mw;
+      const gx = lx + r.x1, gy = ly + r.y1;
+      // 4-connected neighbours, bounded by rect
+      if (gx > r.x1)     { const ni = mi - 1;  if (!mask[ni] && isW(gx - 1, gy)) { mask[ni] = 1; stack.push(ni); } }
+      if (gx < r.x2 - 1) { const ni = mi + 1;  if (!mask[ni] && isW(gx + 1, gy)) { mask[ni] = 1; stack.push(ni); } }
+      if (gy > r.y1)     { const ni = mi - mw; if (!mask[ni] && isW(gx, gy - 1)) { mask[ni] = 1; stack.push(ni); } }
+      if (gy < r.y2 - 1) { const ni = mi + mw; if (!mask[ni] && isW(gx, gy + 1)) { mask[ni] = 1; stack.push(ni); } }
+    }
+    state.baseScreenMasks[idx] = { mask, w: mw, h: mh };
+  });
+
+  updatePreview();
+}
+
+function inNotch(x, y, n) {
+  if (!n) return false;
+  if (x < n.x1 || x > n.x2 || y < n.y1 || y > n.y2) return false;
+  const r = n.cornerR;
+  const blcx = n.x1 + r, blcy = n.y2 - r;
+  if (x < blcx && y > blcy) { const dx = x - blcx, dy = y - blcy; return dx*dx + dy*dy <= r*r; }
+  const brcx = n.x2 - r, brcy = n.y2 - r;
+  if (x > brcx && y > brcy) { const dx = x - brcx, dy = y - brcy; return dx*dx + dy*dy <= r*r; }
+  return true;
+}
+
+function inRoundedScreen(x, y, rect, r) {
+  if (x < rect.x1 || x >= rect.x2 || y < rect.y1 || y >= rect.y2) return false;
+  if (x < rect.x1 + r && y < rect.y1 + r) { const dx = x - (rect.x1 + r), dy = y - (rect.y1 + r); return dx*dx + dy*dy <= r*r; }
+  if (x >= rect.x2 - r && y < rect.y1 + r) { const dx = x - (rect.x2 - r), dy = y - (rect.y1 + r); return dx*dx + dy*dy <= r*r; }
+  if (x < rect.x1 + r && y >= rect.y2 - r) { const dx = x - (rect.x1 + r), dy = y - (rect.y2 - r); return dx*dx + dy*dy <= r*r; }
+  if (x >= rect.x2 - r && y >= rect.y2 - r) { const dx = x - (rect.x2 - r), dy = y - (rect.y2 - r); return dx*dx + dy*dy <= r*r; }
+  return true;
+}
+
+function composite(offsets) {
+  const cfg = MODES[state.mode];
+  const base = state.baseImg;
+  const W = base.width, H = base.height;
+
+  const outC = document.createElement('canvas');
+  outC.width = W; outC.height = H;
+  const outCtx = outC.getContext('2d');
+  outCtx.drawImage(base, 0, 0);
+  const img = outCtx.getImageData(0, 0, W, H);
+  const out = img.data;
+  const baseD = state.baseData;
+
+  // Order: laptop first, phone last (so phone overlays laptop if they overlap)
+  const screens = [...cfg.screens].sort((a, b) => (a.kind === 'phone') - (b.kind === 'phone'));
+
+  for (let si = 0; si < screens.length; si++) {
+    const s = screens[si];
+    const idx = cfg.screens.indexOf(s);
+    const maskInfo = state.baseScreenMasks[idx];
+    const mask = maskInfo.mask, mw_ = maskInfo.w;
+    const rect = s.rect;
+    const rw = rect.x2 - rect.x1, rh = rect.y2 - rect.y1;
+
+    const srcImg = s.slot === 'pc' ? state.pcImg : state.phoneImg;
+    if (!srcImg) continue;
+
+    // Stretch screenshot to fill the screen exactly
+    const srcC = document.createElement('canvas');
+    srcC.width = rw; srcC.height = rh;
+    const srcCtx = srcC.getContext('2d');
+    srcCtx.imageSmoothingEnabled = true;
+    srcCtx.imageSmoothingQuality = 'high';
+    srcCtx.drawImage(srcImg, 0, 0, rw, rh);
+    const srcData = srcCtx.getImageData(0, 0, rw, rh).data;
+
+    // Per-screen offset in pixels (slider value is % of rect size).
+    const offset = (offsets && offsets[s.slot]) || { x: 0, y: 0 };
+    const offX = Math.round(rw * offset.x / 100);
+    const offY = Math.round(rh * offset.y / 100);
+
+    const isPhone = s.kind === 'phone';
+    const phoneRect = !isPhone ? cfg.screens.find(x => x.kind === 'phone' && x !== s) : null;
+    for (let y = rect.y1; y < rect.y2; y++) {
+      for (let x = rect.x1; x < rect.x2; x++) {
+        const mi = (y - rect.y1) * mw_ + (x - rect.x1);
+        if (!mask[mi]) continue;
+        if (phoneRect) {
+          const pr = phoneRect.rect;
+          if (x >= pr.x1 && x < pr.x2 && y >= pr.y1 - 10 && y < pr.y2) continue;
+        }
+        const oi = (y * W + x) * 4;
+        if (isPhone && inNotch(x, y, s.notch)) continue;
+        // Sample from screenshot with offset; clamp to edge for out-of-bounds pixels
+        let sx = x - rect.x1 - offX;
+        let sy = y - rect.y1 - offY;
+        if (sx < 0) sx = 0; else if (sx >= rw) sx = rw - 1;
+        if (sy < 0) sy = 0; else if (sy >= rh) sy = rh - 1;
+        const si2 = (sy * rw + sx) * 4;
+        out[oi] = srcData[si2]; out[oi+1] = srcData[si2+1]; out[oi+2] = srcData[si2+2];
+      }
+    }
+  }
+  outCtx.putImageData(img, 0, 0);
+  return outC;
+}
+
+function computeCrop(canvas, aspect) {
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const data = ctx.getImageData(0, 0, W, H).data;
+  let x1 = W, x2 = 0, y1 = H, y2 = 0;
+  const step = 4;
+  for (let y = 0; y < H; y += step) {
+    for (let x = 0; x < W; x += step) {
+      const i = (y * W + x) * 4;
+      if (data[i] < 245 || data[i+1] < 245 || data[i+2] < 245) {
+        if (x < x1) x1 = x; if (x > x2) x2 = x;
+        if (y < y1) y1 = y; if (y > y2) y2 = y;
+      }
+    }
+  }
+  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
+  const contentW = x2 - x1, contentH = y2 - y1;
+  const margin = 60;
+  let cropH, cropW;
+  // Fit to aspect = w/h
+  if ((contentW + margin*2) / (contentH + margin*2) > aspect) {
+    cropW = contentW + margin * 2;
+    cropH = cropW / aspect;
+  } else {
+    cropH = contentH + margin * 2;
+    cropW = cropH * aspect;
+  }
+  return {
+    x: Math.round(cx - cropW / 2),
+    y: Math.round(cy - cropH / 2),
+    w: Math.round(cropW),
+    h: Math.round(cropH),
+  };
+}
+
+function renderFinal(comp, outW, outH) {
+  const cfg = MODES[state.mode];
+  const crop = computeCrop(comp, cfg.aspect);
+  const final = document.createElement('canvas');
+  final.width = outW; final.height = outH;
+  const fctx = final.getContext('2d');
+  fctx.imageSmoothingEnabled = true;
+  fctx.imageSmoothingQuality = 'high';
+  fctx.drawImage(comp, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
+
+  // Flood-fill from edges across NEAR-white pixels, with smooth alpha falloff.
+  const d = fctx.getImageData(0, 0, outW, outH);
+  const arr = d.data;
+  const visited = new Uint8Array(outW * outH);
+  const stack = [];
+  const NEAR_WHITE = 180;
+  const isNear = (i) => arr[i] > NEAR_WHITE && arr[i + 1] > NEAR_WHITE && arr[i + 2] > NEAR_WHITE;
+  for (let x = 0; x < outW; x++) {
+    let p = x; if (isNear(p * 4) && !visited[p]) { visited[p] = 1; stack.push(p); }
+    p = (outH - 1) * outW + x; if (isNear(p * 4) && !visited[p]) { visited[p] = 1; stack.push(p); }
+  }
+  for (let y = 0; y < outH; y++) {
+    let p = y * outW; if (isNear(p * 4) && !visited[p]) { visited[p] = 1; stack.push(p); }
+    p = y * outW + (outW - 1); if (isNear(p * 4) && !visited[p]) { visited[p] = 1; stack.push(p); }
+  }
+  while (stack.length) {
+    const p = stack.pop();
+    const x = p % outW, y = (p - x) / outW;
+    if (x > 0 && !visited[p-1] && isNear((p-1)*4)) { visited[p-1] = 1; stack.push(p-1); }
+    if (x < outW-1 && !visited[p+1] && isNear((p+1)*4)) { visited[p+1] = 1; stack.push(p+1); }
+    if (y > 0 && !visited[p-outW] && isNear((p-outW)*4)) { visited[p-outW] = 1; stack.push(p-outW); }
+    if (y < outH-1 && !visited[p+outW] && isNear((p+outW)*4)) { visited[p+outW] = 1; stack.push(p+outW); }
+  }
+  for (let p = 0; p < outW * outH; p++) {
+    if (!visited[p]) continue;
+    const i = p * 4;
+    const b = Math.max(arr[i], arr[i + 1], arr[i + 2]);
+    let alpha;
+    if (b >= 250) alpha = 0;
+    else alpha = Math.round((250 - b) * 255 / (250 - NEAR_WHITE));
+    if (alpha < arr[i + 3]) arr[i + 3] = alpha;
+  }
+  fctx.putImageData(d, 0, 0);
+
+  return final;
+}
+
+// ---------- UI ----------
+function readFileAsImage(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => res(img); img.onerror = rej; img.src = reader.result;
+    };
+    reader.onerror = rej; reader.readAsDataURL(file);
+  });
+}
+
+function setupDropZone(dropEl, fileInput, onLoad) {
+  dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('drag'); });
+  dropEl.addEventListener('dragleave', () => dropEl.classList.remove('drag'));
+  dropEl.addEventListener('drop', e => {
+    e.preventDefault(); dropEl.classList.remove('drag');
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      fileInput.dispatchEvent(new Event('change'));
+    }
+  });
+  fileInput.addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = await readFileAsImage(f);
+    dropEl.classList.add('has-file');
+    const labelText = dropEl.dataset.need === 'pc' ? 'PC スクリーンショット'
+                    : dropEl.dataset.need === 'phone' ? 'スマートフォン スクリーンショット'
+                    : '背景画像';
+    dropEl.innerHTML = '';
+    const prev = document.createElement('div');
+    prev.className = 'preview';
+    prev.style.backgroundImage = 'url(' + img.src + ')';
+    dropEl.appendChild(prev);
+    const lab = document.createElement('div'); lab.className = 'label'; lab.textContent = labelText;
+    dropEl.appendChild(lab);
+    const meta = document.createElement('div'); meta.className = 'slot-name';
+    meta.textContent = f.name + ' · ' + img.width + '×' + img.height;
+    dropEl.appendChild(meta);
+    dropEl.appendChild(fileInput);
+    onLoad(img);
+  });
+}
+
+let lastFinalCanvas = null;
+const statusEl = document.getElementById('status');
+
+async function updatePreview() {
+  const cfg = MODES[state.mode];
+  // Check we have required inputs
+  const hasAll = cfg.needs.every(n => (n === 'pc' ? state.pcImg : state.phoneImg));
+  if (!hasAll || !state.baseImg) {
+    document.getElementById('preview').style.display = 'none';
+    statusEl.style.display = 'block';
+    statusEl.textContent = '画像をアップロードしてください';
+    document.getElementById('btnDownload').disabled = true;
+    return;
+  }
+  statusEl.textContent = '生成中…';
+  document.getElementById('preview').style.display = 'none';
+  statusEl.style.display = 'block';
+  await new Promise(r => setTimeout(r, 16));
+
+  const offsets = {
+    pc:    { x: parseInt(document.getElementById('pcX').value) || 0, y: parseInt(document.getElementById('pcY').value) || 0 },
+    phone: { x: parseInt(document.getElementById('phX').value) || 0, y: parseInt(document.getElementById('phY').value) || 0 },
+  };
+  const comp = composite(offsets);
+
+  const sizeSel = document.getElementById('outSize').value;
+  let outW, outH;
+  if (sizeSel === 'custom') {
+    outW = Math.max(100, parseInt(document.getElementById('customW').value) || 800);
+    outH = Math.round(outW / cfg.aspect);
+  } else {
+    [outW, outH] = sizeSel.split('x').map(Number);
+  }
+  const finalC = renderFinal(comp, outW, outH);
+  lastFinalCanvas = finalC;
+
+  const previewEl = document.getElementById('preview');
+  previewEl.width = finalC.width; previewEl.height = finalC.height;
+  previewEl.getContext('2d').drawImage(finalC, 0, 0);
+  previewEl.style.display = 'block';
+  statusEl.style.display = 'none';
+
+  document.getElementById('btnDownload').disabled = false;
+  document.getElementById('metaInfo').innerHTML =
+    '<b>' + outW + ' × ' + outH + '</b> px · 背景: <b>透明 (PNG)</b>';
+}
+
+function downloadPNG() {
+  if (!lastFinalCanvas) return;
+  const w = lastFinalCanvas.width, h = lastFinalCanvas.height;
+  const filename = 'mockup_' + state.mode + '_' + w + 'x' + h + '.png';
+  lastFinalCanvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', async () => {
+    document.querySelectorAll('.tab').forEach(o => o.classList.remove('active'));
+    t.classList.add('active');
+    await setMode(t.dataset.mode);
+  });
+});
+
+setupDropZone(document.getElementById('dropPC'), document.getElementById('filePC'), img => {
+  state.pcImg = img; updatePreview();
+});
+setupDropZone(document.getElementById('dropPhone'), document.getElementById('filePhone'), img => {
+  state.phoneImg = img; updatePreview();
+});
+
+// Position nudge buttons
+function setNudgeValue(id, value) {
+  document.getElementById(id).value = value;
+  document.getElementById(id + 'Val').textContent = value;
+}
+let nudgeTimer = null;
+document.querySelectorAll('.nudge-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    const delta = parseInt(btn.dataset.delta);
+    const cur = parseInt(document.getElementById(target).value) || 0;
+    const next = Math.max(-50, Math.min(50, cur + delta));
+    setNudgeValue(target, next);
+    if (nudgeTimer) clearTimeout(nudgeTimer);
+    nudgeTimer = setTimeout(updatePreview, 80);
+  });
+});
+function resetPositions() {
+  ['pcX','pcY','phX','phY'].forEach(id => setNudgeValue(id, 0));
+}
+document.getElementById('btnResetPos').addEventListener('click', () => {
+  resetPositions();
+  updatePreview();
+});
+document.getElementById('outSize').addEventListener('change', e => {
+  document.getElementById('customRow').style.display = e.target.value === 'custom' ? 'block' : 'none';
+  updatePreview();
+});
+document.getElementById('customW').addEventListener('change', updatePreview);
+document.getElementById('btnPreview').addEventListener('click', updatePreview);
+document.getElementById('btnDownload').addEventListener('click', downloadPNG);
+
+// Init with combined mode
+setMode('combined');
+</script>
+</body>
+</html>
