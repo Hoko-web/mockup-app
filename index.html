@@ -387,36 +387,14 @@ const MODES = {
     ],
     needs: ['phone'],
     defaultCornerR: 0,
-    defaultSize: '1080x1920',
+    defaultSize: '1200x800',
   },
 };
 
-// Output sizes available across all modes. Grouped by aspect ratio.
-// (Ratio is derived from W/H at render time, so any size works in any mode.)
-const SIZE_GROUPS = [
-  ['ウェブ・記事用 (3:2)', [
-    ['800x533',  '800 × 533'],
-    ['1200x800', '1200 × 800'],
-    ['1600x1067','1600 × 1067'],
-    ['2400x1600','2400 × 1600'],
-  ]],
-  ['Instagram 投稿 (1:1)', [
-    ['1080x1080','1080 × 1080'],
-    ['2048x2048','2048 × 2048'],
-  ]],
-  ['Instagram ポートレート (4:5)', [
-    ['1080x1350','1080 × 1350'],
-  ]],
-  ['Stories / Reels / TikTok (9:16)', [
-    ['540x960',  '540 × 960'],
-    ['720x1280', '720 × 1280'],
-    ['1080x1920','1080 × 1920'],
-  ]],
-  ['YouTube / X 横長 (16:9)', [
-    ['1280x720', '1280 × 720'],
-    ['1920x1080','1920 × 1080'],
-    ['2560x1440','2560 × 1440'],
-  ]],
+// Output sizes — minimal set, works for any mode (ratio derived from W/H).
+const SIZES = [
+  ['800x533',  '800 × 533 (3:2)'],
+  ['1200x800', '1200 × 800 (3:2)'],
 ];
 
 const state = {
@@ -853,19 +831,14 @@ document.getElementById('btnResetPos').addEventListener('click', () => {
   resetPositions();
   updatePreview();
 });
-// Populate the size dropdown once with all groups
+// Populate the size dropdown once
 (function populateSizes() {
   const sel = document.getElementById('outSize');
   sel.innerHTML = '';
-  for (const [label, options] of SIZE_GROUPS) {
-    const og = document.createElement('optgroup');
-    og.label = label;
-    for (const [v, l] of options) {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = l;
-      og.appendChild(o);
-    }
-    sel.appendChild(og);
+  for (const [v, label] of SIZES) {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = label;
+    sel.appendChild(o);
   }
   const custom = document.createElement('option');
   custom.value = 'custom'; custom.textContent = 'カスタム…';
