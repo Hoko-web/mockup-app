@@ -29,6 +29,18 @@
   h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; letter-spacing: 0.02em; }
   .sub { color: var(--text-dim); font-size: 13px; }
 
+  .credit {
+    position: fixed;
+    bottom: 10px;
+    right: 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+    user-select: none;
+    pointer-events: none;
+  }
+
   .privacy-note {
     display: inline-flex;
     align-items: center;
@@ -833,5 +845,6 @@ document.getElementById('btnDownload').addEventListener('click', downloadPNG);
 // Init with combined mode
 setMode('combined');
 </script>
+<div class="credit">© Hoko</div>
 </body>
 </html>
