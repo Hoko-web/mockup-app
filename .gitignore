@@ -1,4 +1,5 @@
 .DS_Store
+.vscode
 *.eps
 node_modules/
 CLAUDE.md
