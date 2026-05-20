@@ -80,8 +80,8 @@ python3 -m http.server 5501
 
 ## ライセンス
 
-- **コード**: ライセンス未指定（追記予定）
-- **画像素材** (`base.jpg` / `laptop_only.jpg` / `phone_only.jpg`): 各素材の出所ライセンスに従ってください
+- **コード**: [MIT License](./LICENSE)
+- **画像素材** (`assets/base.jpg` / `assets/laptop_only.jpg` / `assets/phone_only.jpg`): 各素材の出所ライセンスに従ってください
 
 ## 作者
 
