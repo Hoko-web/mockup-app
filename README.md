@@ -50,7 +50,8 @@ mockup-app/
 ├── assets/
 │   ├── base.webp           … PC + スマホの合成 base 画像
 │   ├── laptop_only.webp    … PC 単体の base 画像
-│   └── phone_only.webp     … スマホ単体の base 画像
+│   ├── phone_only.webp     … スマホ単体の base 画像
+│   └── favicon.svg         … ブラウザタブ用アイコン
 ├── docs/
 │   └── screenshot.png      … README 用のスクリーンショット
 ├── mockup_generator.html   … 開発版（base 画像を外部から読み込む / 30KB）

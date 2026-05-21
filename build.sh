@@ -18,6 +18,17 @@ for fname in bases:
     if n == 0:
         raise SystemExit(f"marker not found: assets/{fname}")
     html = new_html
+
+# Embed favicon.svg as data URL so the distributable single file keeps its icon.
+favicon_path = pathlib.Path("assets") / "favicon.svg"
+favicon_b64 = base64.b64encode(favicon_path.read_bytes()).decode()
+favicon_pattern = re.compile(r'href=["\']assets/favicon\.svg["\']')
+favicon_replacement = f'href="data:image/svg+xml;base64,{favicon_b64}"'
+new_html, n = favicon_pattern.subn(favicon_replacement, html, count=1)
+if n == 0:
+    raise SystemExit("marker not found: assets/favicon.svg")
+html = new_html
+
 pathlib.Path("index.html").write_text(html, encoding="utf-8")
 size_mb = len(html.encode("utf-8")) / 1024 / 1024
 print(f"index.html を生成しました ({size_mb:.2f} MB)")
