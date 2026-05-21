@@ -23,7 +23,7 @@
 ## プライバシー / セキュリティ
 
 - **画像はすべてブラウザ内で処理** — `fetch` / `XHR` / `WebSocket` の実装ゼロ
-- **Content Security Policy (CSP)** 適用 — `connect-src 'none'` で外部送信を物理的に禁止、 `frame-ancestors 'none'` でクリックジャッキング対策、 `object-src 'none'` / `base-uri 'none'` で DOM 改ざんを防御
+- **Content Security Policy (CSP)** 適用 — `connect-src 'none'` で外部送信を物理的に禁止、 `object-src 'none'` / `base-uri 'none'` で DOM 改ざんを防御
 - **第三者トラッキング・アナリティクスなし**
 - **XSS sink ゼロ** — ユーザー入力を含む箇所はすべて `textContent` または DOM API で構築
 

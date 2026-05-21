@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';"
     />
     <meta name="referrer" content="no-referrer" />
     <title>Mockup Generator</title>
@@ -705,7 +705,7 @@
         const c = document.createElement("canvas");
         c.width = W;
         c.height = H;
-        const ctx = c.getContext("2d");
+        const ctx = c.getContext("2d", { willReadFrequently: true });
         ctx.drawImage(state.baseImg, 0, 0);
         state.baseData = ctx.getImageData(0, 0, W, H).data;
 
@@ -846,7 +846,7 @@
         const outC = document.createElement("canvas");
         outC.width = W;
         outC.height = H;
-        const outCtx = outC.getContext("2d");
+        const outCtx = outC.getContext("2d", { willReadFrequently: true });
         outCtx.drawImage(base, 0, 0);
         const img = outCtx.getImageData(0, 0, W, H);
         const out = img.data;
@@ -874,7 +874,7 @@
           const srcC = document.createElement("canvas");
           srcC.width = rw;
           srcC.height = rh;
-          const srcCtx = srcC.getContext("2d");
+          const srcCtx = srcC.getContext("2d", { willReadFrequently: true });
           srcCtx.imageSmoothingEnabled = true;
           srcCtx.imageSmoothingQuality = "high";
           srcCtx.drawImage(srcImg, 0, 0, rw, rh);
@@ -921,7 +921,7 @@
       function computeCrop(canvas, aspect) {
         const W = canvas.width,
           H = canvas.height;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
         const data = ctx.getImageData(0, 0, W, H).data;
         let x1 = W,
           x2 = 0,
@@ -966,7 +966,7 @@
         const final = document.createElement("canvas");
         final.width = outW;
         final.height = outH;
-        const fctx = final.getContext("2d");
+        const fctx = final.getContext("2d", { willReadFrequently: true });
         fctx.imageSmoothingEnabled = true;
         fctx.imageSmoothingQuality = "high";
         fctx.drawImage(comp, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
