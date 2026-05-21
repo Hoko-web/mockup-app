@@ -2,6 +2,8 @@
 
 スクリーンショットを差し替えるだけで、ノートPC・スマートフォンのモックアップ画像を生成するブラウザツールです。
 
+![Mockup Generator のスクリーンショット](./docs/screenshot.png)
+
 **🔗 [公開ページ (GitHub Pages)](https://hoko-web.github.io/mockup-app/)**
 
 すべての画像処理はブラウザ内で完結し、外部サーバーへは送信されません。
@@ -49,6 +51,8 @@ mockup-app/
 │   ├── base.webp           … PC + スマホの合成 base 画像
 │   ├── laptop_only.webp    … PC 単体の base 画像
 │   └── phone_only.webp     … スマホ単体の base 画像
+├── docs/
+│   └── screenshot.png      … README 用のスクリーンショット
 ├── mockup_generator.html   … 開発版（base 画像を外部から読み込む / 30KB）
 ├── index.html              … 配布版（base 画像を base64 で埋め込んだ単一ファイル / 350KB）
 ├── build.sh                … mockup_generator.html + assets/ の画像 → index.html を生成
