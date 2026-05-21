@@ -50,7 +50,7 @@ mockup-app/
 │   ├── laptop_only.webp    … PC 単体の base 画像
 │   └── phone_only.webp     … スマホ単体の base 画像
 ├── mockup_generator.html   … 開発版（base 画像を外部から読み込む / 30KB）
-├── index.html              … 配布版（base 画像を base64 で埋め込んだ単一ファイル / 500KB）
+├── index.html              … 配布版（base 画像を base64 で埋め込んだ単一ファイル / 350KB）
 ├── build.sh                … mockup_generator.html + assets/ の画像 → index.html を生成
 ├── LICENSE                 … MIT License
 └── README.md
