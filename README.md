@@ -46,11 +46,11 @@
 ```
 mockup-app/
 ├── assets/
-│   ├── base.jpg            … PC + スマホの合成 base 画像
-│   ├── laptop_only.jpg     … PC 単体の base 画像
-│   └── phone_only.jpg      … スマホ単体の base 画像
+│   ├── base.webp           … PC + スマホの合成 base 画像
+│   ├── laptop_only.webp    … PC 単体の base 画像
+│   └── phone_only.webp     … スマホ単体の base 画像
 ├── mockup_generator.html   … 開発版（base 画像を外部から読み込む / 30KB）
-├── index.html              … 配布版（base 画像を base64 で埋め込んだ単一ファイル / 3.5MB）
+├── index.html              … 配布版（base 画像を base64 で埋め込んだ単一ファイル / 500KB）
 ├── build.sh                … mockup_generator.html + assets/ の画像 → index.html を生成
 ├── LICENSE                 … MIT License
 └── README.md
@@ -85,7 +85,7 @@ python3 -m http.server 5501
 ## ライセンス
 
 - **コード**: [MIT License](./LICENSE)
-- **画像素材** (`assets/base.jpg` / `assets/laptop_only.jpg` / `assets/phone_only.jpg`): 各素材の出所ライセンスに従ってください
+- **画像素材** (`assets/base.webp` / `assets/laptop_only.webp` / `assets/phone_only.webp`): 各素材の出所ライセンスに従ってください
 
 ## 作者
 

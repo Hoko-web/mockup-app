@@ -501,11 +501,6 @@
                 </button>
               </div>
             </div>
-            <!-- hidden inputs hold the values -->
-            <input type="hidden" id="pcX" value="0" />
-            <input type="hidden" id="pcY" value="0" />
-            <input type="hidden" id="phX" value="0" />
-            <input type="hidden" id="phY" value="0" />
             <button
               type="button"
               class="btn secondary"
@@ -587,7 +582,7 @@
       // =====================================================
       const MODES = {
         combined: {
-          base: "assets/base.jpg",
+          base: "assets/base.webp",
           screens: [
             {
               kind: "laptop",
@@ -606,7 +601,7 @@
           defaultSize: "1200x800",
         },
         laptop: {
-          base: "assets/laptop_only.jpg",
+          base: "assets/laptop_only.webp",
           screens: [
             {
               kind: "laptop",
@@ -620,7 +615,7 @@
           defaultSize: "1200x800",
         },
         phone: {
-          base: "assets/phone_only.jpg",
+          base: "assets/phone_only.webp",
           screens: [
             {
               kind: "phone",
@@ -648,6 +643,7 @@
         baseData: null, // base ImageData.data for in-place hole preservation
         pcImg: null,
         phoneImg: null,
+        offsets: { pcX: 0, pcY: 0, phX: 0, phY: 0 }, // % offset per axis, range -50..50
       };
 
       // ---------- Image / file utils ----------
@@ -698,6 +694,7 @@
         try {
           state.baseImg = await loadBase(cfg.base);
         } catch (e) {
+          console.error("loadBase failed:", cfg.base, e);
           statusEl.textContent =
             "デバイス画像 (" + cfg.base + ") の読み込みに失敗しました";
           return;
@@ -1100,7 +1097,8 @@
           let img;
           try {
             img = await readFileAsImage(f);
-          } catch {
+          } catch (e) {
+            console.error("readFileAsImage failed:", f.name, e);
             alert(
               "画像の読み込みに失敗しました（壊れているか非対応の形式の可能性）",
             );
@@ -1154,14 +1152,8 @@
         await new Promise((r) => setTimeout(r, 16));
 
         const offsets = {
-          pc: {
-            x: parseInt(document.getElementById("pcX").value, 10) || 0,
-            y: parseInt(document.getElementById("pcY").value, 10) || 0,
-          },
-          phone: {
-            x: parseInt(document.getElementById("phX").value, 10) || 0,
-            y: parseInt(document.getElementById("phY").value, 10) || 0,
-          },
+          pc: { x: state.offsets.pcX, y: state.offsets.pcY },
+          phone: { x: state.offsets.phX, y: state.offsets.phY },
         };
         const comp = composite(offsets);
 
@@ -1249,7 +1241,7 @@
 
       // Position nudge buttons
       function setNudgeValue(id, value) {
-        document.getElementById(id).value = value;
+        state.offsets[id] = value;
         document.getElementById(id + "Val").textContent = value;
       }
       let nudgeTimer = null;
@@ -1257,7 +1249,7 @@
         btn.addEventListener("click", () => {
           const target = btn.dataset.target;
           const delta = parseInt(btn.dataset.delta, 10);
-          const cur = parseInt(document.getElementById(target).value, 10) || 0;
+          const cur = state.offsets[target] || 0;
           const next = Math.max(-50, Math.min(50, cur + delta));
           setNudgeValue(target, next);
           if (nudgeTimer) clearTimeout(nudgeTimer);
