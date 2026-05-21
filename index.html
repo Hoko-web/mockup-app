@@ -211,7 +211,8 @@
       .slider-row:last-child {
         margin-bottom: 0;
       }
-      .slider-row label {
+      .slider-row label,
+      .slider-row .label-text {
         display: flex;
         justify-content: space-between;
         font-size: 12px;
@@ -514,11 +515,11 @@
           <div class="panel">
             <h2>3. 出力設定</h2>
             <div class="slider-row">
-              <label>出力サイズ</label>
+              <label for="outSize">出力サイズ</label>
               <select id="outSize"></select>
             </div>
             <div class="slider-row" id="customRow" style="display: none">
-              <label>カスタムサイズ (幅 × 高)</label>
+              <div class="label-text">カスタムサイズ (幅 × 高)</div>
               <div class="row">
                 <input
                   type="number"
@@ -527,6 +528,7 @@
                   min="100"
                   max="8000"
                   placeholder="幅"
+                  aria-label="カスタムサイズの幅 (px)"
                 />
                 <input
                   type="number"
@@ -535,6 +537,7 @@
                   min="100"
                   max="8000"
                   placeholder="高"
+                  aria-label="カスタムサイズの高さ (px)"
                 />
               </div>
             </div>
